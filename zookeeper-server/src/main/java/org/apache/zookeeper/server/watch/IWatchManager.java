@@ -64,7 +64,7 @@ public interface IWatchManager {
 
     /**
      * Distribute the watch event for the given path.
-     *
+     * 触发watcher事件
      * @param path znode path
      * @param type the watch event type
      *

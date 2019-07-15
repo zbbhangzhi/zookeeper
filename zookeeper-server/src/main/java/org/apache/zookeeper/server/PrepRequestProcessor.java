@@ -424,6 +424,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
                 validatePath(path, request.sessionId);
                 nodeRecord = getRecordForPath(path);
                 checkACL(zks, request.cnxn, nodeRecord.acl, ZooDefs.Perms.WRITE, request.authInfo, path, null);
+                //写入校验
                 int newVersion = checkAndIncVersion(nodeRecord.stat.getVersion(), setDataRequest.getVersion(), path);
                 request.setTxn(new SetDataTxn(path, setDataRequest.getData(), newVersion));
                 nodeRecord = nodeRecord.duplicate(request.getHdr().getZxid());
@@ -720,6 +721,14 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
         return path.substring(0, lastSlash);
     }
 
+    /**
+     * 乐观锁写入校验
+     * @param currentVersion
+     * @param expectedVersion
+     * @param path
+     * @return
+     * @throws KeeperException.BadVersionException
+     */
     private static int checkAndIncVersion(int currentVersion, int expectedVersion, String path)
             throws KeeperException.BadVersionException {
         if (expectedVersion != -1 && expectedVersion != currentVersion) {

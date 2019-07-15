@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Interface to a Server connection - represents a connection from a client
  * to the server.
+ * 客户端与服务端的连接接口 可以看成一个watcher对象 因为实现了watcher的process接口
  */
 public abstract class ServerCnxn implements Stats, Watcher {
     // This is just an arbitrary object to represent requests issued by

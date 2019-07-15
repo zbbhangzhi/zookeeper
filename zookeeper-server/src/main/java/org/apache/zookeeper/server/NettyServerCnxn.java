@@ -153,6 +153,7 @@ public class NettyServerCnxn extends ServerCnxn {
 
     @Override
     public void process(WatchedEvent event) {
+        //请求头标记-1 声明这个是通知
         ReplyHeader h = new ReplyHeader(-1, -1L, 0);
         if (LOG.isTraceEnabled()) {
             ZooTrace.logTraceMessage(LOG, ZooTrace.EVENT_DELIVERY_TRACE_MASK,
@@ -162,9 +163,11 @@ public class NettyServerCnxn extends ServerCnxn {
         }
 
         // Convert WatchedEvent to a type that can be sent over the wire
+        //watchedEvent包装成WatcherEvent 方便网络传输
         WatcherEvent e = event.getWrapper();
 
         try {
+            //向客户端发送通知
             sendResponse(h, e, "notification");
         } catch (IOException e1) {
             if (LOG.isDebugEnabled()) {

@@ -39,13 +39,20 @@ import org.slf4j.LoggerFactory;
 /**
  * This class manages watches. It allows watches to be associated with a string
  * and removes watchers and their watches in addition to managing triggers.
+ * 存储标记了watcher注册请求 对应的ServerCnxn并触发它
  */
 public class WatchManager implements IWatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);
 
+    /**
+     * 从数据节点路径的粒度来托管watcher
+     */
     private final Map<String, Set<Watcher>> watchTable =
         new HashMap<String, Set<Watcher>>();
 
+    /**
+     * 从watcher的粒度来控制事件触发需要触发的数据节点
+     */
     private final Map<Watcher, Set<String>> watch2Paths =
         new HashMap<Watcher, Set<String>>();
     
@@ -113,10 +120,12 @@ public class WatchManager implements IWatchManager {
     @Override
     public WatcherOrBitSet triggerWatch(
             String path, EventType type, WatcherOrBitSet supress) {
+        //封装WatchEvent
         WatchedEvent e = new WatchedEvent(type,
                 KeeperState.SyncConnected, path);
         Set<Watcher> watchers;
         synchronized (this) {
+            //查找对应watcher并删除 如果没有就直接退出
             watchers = watchTable.remove(path);
             if (watchers == null || watchers.isEmpty()) {
                 if (LOG.isTraceEnabled()) {
@@ -137,6 +146,7 @@ public class WatchManager implements IWatchManager {
             if (supress != null && supress.contains(w)) {
                 continue;
             }
+            //触发watcher 对应ServerCnxn
             w.process(e);
         }
 

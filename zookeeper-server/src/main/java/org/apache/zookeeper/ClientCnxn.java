@@ -298,6 +298,9 @@ public class ClientCnxn {
             this.watchRegistration = watchRegistration;
         }
 
+        /**
+         * packet只序列化了requestHeader和request
+         */
         public void createBB() {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -835,6 +838,11 @@ public class ClientCnxn {
         private Random r = new Random();
         private boolean isFirstConnect = true;
 
+        /**
+         * 接收服務端的响应
+         * @param incomingBuffer
+         * @throws IOException
+         */
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
             ByteBufferInputStream bbis = new ByteBufferInputStream(
                     incomingBuffer);
@@ -951,6 +959,8 @@ public class ClientCnxn {
                             + Long.toHexString(sessionId) + ", packet:: " + packet);
                 }
             } finally {
+                //从packet中取出对应的watcher并注册到zkWatchManager中
+                // 但是需要先从watchregistration这个封装对象中拿出
                 finishPacket(packet);
             }
         }
@@ -1544,6 +1554,8 @@ public class ClientCnxn {
             WatchDeregistration watchDeregistration)
             throws InterruptedException {
         ReplyHeader r = new ReplyHeader();
+        // packet是客户端与服务端之间通信的最小协议单元
+        // watchRegistration被封装到packet中等待发送队列发送到服务端
         Packet packet = queuePacket(h, r, request, response, null, null, null,
                 null, watchRegistration, watchDeregistration);
         synchronized (packet) {

@@ -618,6 +618,7 @@ public class FinalRequestProcessor implements RequestProcessor {
         PrepRequestProcessor.checkACL(zks, cnxn, zks.getZKDatabase().aclForNode(n),
                 ZooDefs.Perms.READ, authInfo, path, null);
         Stat stat = new Stat();
+        //getDataRequest.getWatch() 判断客户端是否需要注册watcher 需要就传送当前的serverCnxn
         byte b[] = zks.getZKDatabase().getData(path, stat,
                 getDataRequest.getWatch() ? cnxn : null);
         return new GetDataResponse(b, stat);

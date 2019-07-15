@@ -684,6 +684,7 @@ public class DataTree {
         synchronized (n) {
             n.copyStat(stat);
             if (watcher != null) {
+                //存储watcher及其对应路径到watcherManager
                 dataWatches.addWatch(path, watcher);
             }
             data = n.data;
