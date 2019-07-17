@@ -470,6 +470,7 @@ public class ClientCnxn {
             }
             sessionState = event.getState();
             final Set<Watcher> watchers;
+            //根据通知事件取出相关watcher
             if (materializedWatchers == null) {
                 // materialize the watchers based on the event
                 watchers = watcher.materialize(event.getState(),
@@ -504,6 +505,7 @@ public class ClientCnxn {
             waitingEvents.add(eventOfDeath);
         }
 
+        //watcher回调事件轮询处理
         @Override
         @SuppressFBWarnings("JLM_JSR166_UTILCONCURRENT_MONITORENTER")
         public void run() {
@@ -831,6 +833,7 @@ public class ClientCnxn {
     /**
      * This class services the outgoing request queue and generates the heart
      * beats. It also spawns the ReadThread.
+     * 接收事件通知
      */
     class SendThread extends ZooKeeperThread {
         private long lastPingSentNs;
@@ -848,8 +851,9 @@ public class ClientCnxn {
                     incomingBuffer);
             BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
             ReplyHeader replyHdr = new ReplyHeader();
-
+            //反序列化成WatcherEvent对象
             replyHdr.deserialize(bbia, "header");
+            //ping
             if (replyHdr.getXid() == -2) {
                 // -2 is the xid for pings
                 if (LOG.isDebugEnabled()) {
@@ -861,6 +865,7 @@ public class ClientCnxn {
                 }
                 return;
             }
+            //auth
             if (replyHdr.getXid() == -4) {
                 // -4 is the xid for AuthPacket               
                 if(replyHdr.getErr() == KeeperException.Code.AUTHFAILED.intValue()) {
@@ -875,12 +880,14 @@ public class ClientCnxn {
                 }
                 return;
             }
+            //通知
             if (replyHdr.getXid() == -1) {
                 // -1 means notification
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got notification sessionid:0x"
                         + Long.toHexString(sessionId));
                 }
+                //反序列化得到WatcherEvent
                 WatcherEvent event = new WatcherEvent();
                 event.deserialize(bbia, "response");
 
@@ -897,13 +904,13 @@ public class ClientCnxn {
                     			+ chrootPath);
                     }
                 }
-
+                //WatcherEvent还原WatchedEvent对象
                 WatchedEvent we = new WatchedEvent(event);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got " + we + " for sessionid 0x"
                             + Long.toHexString(sessionId));
                 }
-
+                //放入队列 回调process方法
                 eventThread.queueEvent( we );
                 return;
             }

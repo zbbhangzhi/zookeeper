@@ -460,6 +460,7 @@ public class ZooKeeper implements AutoCloseable {
         /* (non-Javadoc)
          * @see org.apache.zookeeper.ClientWatchManager#materialize(Event.KeeperState, 
          *                                                        Event.EventType, java.lang.String)
+         *  找到相应的就删除 watcher是一次性的
          */
         @Override
         public Set<Watcher> materialize(Watcher.Event.KeeperState state,

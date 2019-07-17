@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.zookeeper.server.ZooKeeperServer;
 
+/**
+ * 权限控制注册器
+ */
 public class ProviderRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(ProviderRegistry.class);
 
@@ -73,6 +76,7 @@ public class ProviderRegistry {
     }
 
     public static AuthenticationProvider getProvider(String scheme) {
+        //懒加载 当客户端请求包含整个注册器时才初始化
         if(!initialized)
             initialize();
         return authenticationProviders.get(scheme);

@@ -22,6 +22,9 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.server.ServerCnxn;
 
 /**
+ * 标准权限控制器
+ * 可通过系统属性-Dzookeeper.suthProvider.sid=com.xxxxx或配置文件方式zoo.cfg注册自定义权限控制器
+ * 但是权限控制器的注册是懒加载，只有第一次处理包含权限控制的请求时才会初始化，并注册到ProviderRegistry中
  * This interface is implemented by authentication providers to add new kinds of
  * authentication schemes to ZooKeeper.
  */
