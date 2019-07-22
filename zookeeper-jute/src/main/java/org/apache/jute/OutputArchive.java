@@ -24,6 +24,7 @@ import java.util.TreeMap;
 
 /**
  * Interface that all the serializers have to implement.
+ * 序列化器
  *
  */
 public interface OutputArchive {
@@ -36,6 +37,13 @@ public interface OutputArchive {
     public void writeString(String s, String tag) throws IOException;
     public void writeBuffer(byte buf[], String tag)
         throws IOException;
+
+    /**
+     * 调用实现了Record的实体类的序列化方法，r以一定的标记tag写入到序列化器中
+     * @param r
+     * @param tag
+     * @throws IOException
+     */
     public void writeRecord(Record r, String tag) throws IOException;
     public void startRecord(Record r, String tag) throws IOException;
     public void endRecord(Record r, String tag) throws IOException;

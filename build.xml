@@ -343,6 +343,7 @@ xmlns:cs="antlib:com.puppycrawl.tools.checkstyle.ant">
                   targetfile="${src_generated.dir}/.generated"/>
     </target>
 
+    <!-- zookeeper.jute文件在编译过程中动态生成部分类 这些类都会实现Record接口-->
     <target name="compile_jute" depends="jute,compile_jute_uptodate" unless="juteBuild.notRequired">
         <mkdir dir="${src_generated.dir}" />
         <mkdir dir="${csrc_generated.dir}" />

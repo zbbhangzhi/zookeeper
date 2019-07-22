@@ -24,6 +24,7 @@ import java.io.IOException;
 
 /**
  * Interface that is implemented by generated classes.
+ * 序列化反序列化基类：所有需要网络传输或本地存储的类都需要实现这个接口
  * 
  */
 @InterfaceAudience.Public

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- *
+ * 序列化器
  */
 public class BinaryOutputArchive implements OutputArchive {
     private ByteBuffer bb = ByteBuffer.allocate(1024);
