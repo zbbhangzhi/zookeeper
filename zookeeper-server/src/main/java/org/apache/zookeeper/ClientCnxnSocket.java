@@ -134,6 +134,7 @@ abstract class ClientCnxnSocket {
             LOG.trace("readConnectResult " + incomingBuffer.remaining() + " "
                     + buf.toString());
         }
+        //反序列化得到response对象和服务端分配的sessionId
         ByteBufferInputStream bbis = new ByteBufferInputStream(incomingBuffer);
         BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
         ConnectResponse conRsp = new ConnectResponse();
@@ -150,6 +151,7 @@ abstract class ClientCnxnSocket {
         }
 
         this.sessionId = conRsp.getSessionId();
+        //连接成功
         sendThread.onConnected(conRsp.getTimeOut(), this.sessionId,
                 conRsp.getPasswd(), isRO);
     }

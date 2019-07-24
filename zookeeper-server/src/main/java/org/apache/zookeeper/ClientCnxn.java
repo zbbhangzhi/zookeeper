@@ -98,6 +98,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
+ * 客户端核心线程
+ * SendThread：IO线程，负责客户端和服务端之间网络IO通信
+ * EventThread：事件线程，负责对服务端事件进行处理
  * This class manages the socket i/o for the client. ClientCnxn maintains a list
  * of available servers to connect to and "transparently" switches servers it is
  * connected to as needed.
@@ -129,6 +132,8 @@ public class ClientCnxn {
     }
 
     private final CopyOnWriteArraySet<AuthData> authInfo = new CopyOnWriteArraySet<AuthData>();
+
+    //创建两个主要队列：服务端响应等待队列和客户端请求发送队列
 
     /**
      * These are the packets that have been sent and are waiting for a response.
@@ -172,8 +177,14 @@ public class ClientCnxn {
 
     final String chrootPath;
 
+    /**
+     * 管理客户端和服务端之间所有网络IO
+     */
     final SendThread sendThread;
 
+    /**
+     * 客户端事件处理
+     */
     final EventThread eventThread;
 
     /**
@@ -181,6 +192,7 @@ public class ClientCnxn {
      * don't attempt to re-connect to the server if in the middle of closing the
      * connection (client sends session disconnect to server as part of close
      * operation)
+     * 为什么不用cas
      */
     private volatile boolean closing = false;
     
@@ -248,6 +260,7 @@ public class ClientCnxn {
     }
 
     /**
+     * 网络间传输的最小单元
      * This class allows us to pass the headers and the relevant records around.
      */
     static class Packet {
@@ -405,7 +418,6 @@ public class ClientCnxn {
         connectTimeout = sessionTimeout / hostProvider.size();
         readTimeout = sessionTimeout * 2 / 3;
         readOnly = canBeReadOnly;
-
         sendThread = new SendThread(clientCnxnSocket);
         eventThread = new EventThread();
         this.clientConfig=zooKeeper.getClientConfig();
@@ -834,6 +846,7 @@ public class ClientCnxn {
      * This class services the outgoing request queue and generates the heart
      * beats. It also spawns the ReadThread.
      * 接收事件通知
+     * 会话创建的通知在nio网络通信接收时就被处理了
      */
     class SendThread extends ZooKeeperThread {
         private long lastPingSentNs;
@@ -975,6 +988,7 @@ public class ClientCnxn {
         SendThread(ClientCnxnSocket clientCnxnSocket) {
             super(makeThreadName("-SendThread()"));
             state = States.CONNECTING;
+            //分配clientCnxnSocket
             this.clientCnxnSocket = clientCnxnSocket;
             setDaemon(true);
         }
@@ -1064,6 +1078,7 @@ public class ClientCnxn {
                         OpCode.auth), null, new AuthPacket(0, id.scheme,
                         id.data), null, null));
             }
+            //将请求包装成packet放入outgoingQueue中 等待被取出并序列化发送给服务端
             outgoingQueue.addFirst(new Packet(null, null, conReq,
                     null, null, readOnly));
             clientCnxnSocket.connectionPrimed();
@@ -1169,6 +1184,7 @@ public class ClientCnxn {
             InetSocketAddress serverAddress = null;
             while (state.isAlive()) {
                 try {
+                    //客户端初始化后，为会话创建做准备
                     if (!clientCnxnSocket.isConnected()) {
                         // don't re-establish connection if we are closing
                         if (closing) {
@@ -1178,8 +1194,11 @@ public class ClientCnxn {
                             serverAddress = rwServerAddress;
                             rwServerAddress = null;
                         } else {
+                            //随机获取目标服务器地址
                             serverAddress = hostProvider.next(1000);
                         }
+                        //委托clientCnxnSocket去创建与zk服务器之间的TCP长连接
+                        // 创建完毕后构建会话请求
                         startConnect(serverAddress);
                         clientCnxnSocket.updateLastSendAndHeard();
                     }
@@ -1398,6 +1417,7 @@ public class ClientCnxn {
         }
 
         /**
+         * 处理服务端对客户端会话创建的响应：客户端连接
          * Callback invoked by the ClientCnxnSocket once a connection has been
          * established.
          * 
@@ -1427,11 +1447,13 @@ public class ClientCnxn {
             if (!readOnly && isRO) {
                 LOG.error("Read/write client got connected to read-only server");
             }
+            //同步更改客户端会话参数
             readTimeout = negotiatedSessionTimeout * 2 / 3;
             connectTimeout = negotiatedSessionTimeout / hostProvider.size();
             hostProvider.onConnected();
             sessionId = _sessionId;
             sessionPasswd = _sessionPasswd;
+            //更新客户端状态
             state = (isRO) ?
                     States.CONNECTEDREADONLY : States.CONNECTED;
             seenRwServerBefore |= !isRO;
@@ -1442,6 +1464,7 @@ public class ClientCnxn {
                     + (isRO ? " (READ-ONLY mode)" : ""));
             KeeperState eventState = (isRO) ?
                     KeeperState.ConnectedReadOnly : KeeperState.SyncConnected;
+            //生成事件SyncConnected-none：让上层应用感应到会话的成功创建
             eventThread.queueEvent(new WatchedEvent(
                     Watcher.Event.EventType.None,
                     eventState, null));

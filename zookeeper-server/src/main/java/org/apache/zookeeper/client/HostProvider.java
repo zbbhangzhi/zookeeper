@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 
 /**
+ * 客户端地址列表管理器
  * A set of hosts a ZooKeeper client should connect to.
  * 
  * Classes implementing this interface must guarantee the following:

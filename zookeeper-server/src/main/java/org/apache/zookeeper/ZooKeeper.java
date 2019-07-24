@@ -91,6 +91,7 @@ import java.util.Set;
 import static org.apache.zookeeper.Op.OpKind.READ;
 
 /**
+ * 客户端入口
  * This is the main class of ZooKeeper client library. To use a ZooKeeper
  * service, an application must first instantiate an object of ZooKeeper class.
  * All the iterations will be done by calling the methods of ZooKeeper class.
@@ -811,6 +812,7 @@ public class ZooKeeper implements AutoCloseable {
 
 
     /**
+     * 客户端实例初始化过程
      * To create a ZooKeeper client object, the application needs to pass a
      * connection string containing a comma separated list of host:port pairs,
      * each corresponding to a ZooKeeper server.
@@ -879,15 +881,20 @@ public class ZooKeeper implements AutoCloseable {
             clientConfig = new ZKClientConfig();
         }
         this.clientConfig = clientConfig;
+        //创建客户端的watcher管理器
         watchManager = defaultWatchManager();
+        //设置传入的watcher为默认watcher
         watchManager.defaultWatcher = watcher;
+        //设置服务器地址列表
         ConnectStringParser connectStringParser = new ConnectStringParser(
                 connectString);
+        //构造服务器地址管理器
         hostProvider = aHostProvider;
-
+        //创建cnxn，用于管理客户端和服务端的网络交互
         cnxn = createConnection(connectStringParser.getChrootPath(),
                 hostProvider, sessionTimeout, this, watchManager,
                 getClientCnxnSocket(), canBeReadOnly);
+        //初始化两个核心网络线程
         cnxn.start();
     }
 
@@ -3152,6 +3159,11 @@ public class ZooKeeper implements AutoCloseable {
         return cnxn.sendThread.getClientCnxnSocket().getLocalSocketAddress();
     }
 
+    /**
+     * 创建ClientCnxnSocket处理器：clientcnxn底层IO处理器
+     * @return
+     * @throws IOException
+     */
     private ClientCnxnSocket getClientCnxnSocket() throws IOException {
         String clientCnxnSocketName = getClientConfig().getProperty(
                 ZKClientConfig.ZOOKEEPER_CLIENT_CNXN_SOCKET);

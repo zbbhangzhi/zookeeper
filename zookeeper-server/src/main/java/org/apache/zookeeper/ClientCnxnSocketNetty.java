@@ -169,6 +169,7 @@ public class ClientCnxnSocketNetty extends ClientCnxnSocket {
                         lenBuffer.clear();
                         incomingBuffer = lenBuffer;
 
+                        //构建会话请求
                         sendThread.primeConnection();
                         updateNow();
                         updateLastSendAndHeard();
@@ -504,6 +505,7 @@ public class ClientCnxnSocketNetty extends ClientCnxnSocket {
                         recvCount.getAndIncrement();
                         readLength();
                     } else if (!initialized) {
+                        //判断当前客户端是否是已初始化状态 如果没有 那么这个响应就是会话创建的
                         readConnectResult();
                         lenBuffer.clear();
                         incomingBuffer = lenBuffer;
