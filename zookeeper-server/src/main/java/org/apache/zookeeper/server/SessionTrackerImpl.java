@@ -82,7 +82,10 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
      */
     public static long initializeNextSession(long id) {
         long nextSid;
+        //左移当前时间的二进制24位（防止负数），低位用0补，再无符号右移8位（特殊日期2022/4/8会出现负数）
         nextSid = (Time.currentElapsedTime() << 24) >>> 8;
+        //当前机器id左移56位 并做| 操作
+        //高8位为机器id 后56位为当前时间毫秒值的随机
         nextSid =  nextSid | (id <<56);
         if (nextSid == EphemeralType.CONTAINER_EPHEMERAL_OWNER) {
             ++nextSid;  // this is an unlikely edge case, but check it just in case
@@ -100,6 +103,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         this.expirer = expirer;
         this.sessionExpiryQueue = new ExpiryQueue<SessionImpl>(tickTime);
         this.sessionsWithTimeout = sessionsWithTimeout;
+        //生成一个初始化sessionId
         this.nextSessionId.set(initializeNextSession(serverId));
         for (Entry<Long, Integer> e : sessionsWithTimeout.entrySet()) {
             trackSession(e.getKey(), e.getValue());
@@ -172,11 +176,12 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
             return false;
         }
 
+        //如果会话已关闭 就不再激活
         if (s.isClosing()) {
             logTraceTouchClosingSession(sessionId, timeout);
             return false;
         }
-
+        //计算会话新的超时时间
         updateSessionExpiry(s, timeout);
         return true;
     }
@@ -289,6 +294,14 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         return sessionsById.containsKey(sessionId);
     }
 
+    /**
+     * 会话检查 防止会话转移 c1的会话被c2的会话覆盖等情况
+     * @param sessionId
+     * @param owner
+     * @throws KeeperException.SessionExpiredException
+     * @throws KeeperException.SessionMovedException
+     * @throws KeeperException.UnknownSessionException
+     */
     public synchronized void checkSession(long sessionId, Object owner)
             throws KeeperException.SessionExpiredException,
             KeeperException.SessionMovedException,

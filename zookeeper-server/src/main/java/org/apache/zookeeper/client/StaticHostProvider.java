@@ -148,6 +148,7 @@ public final class StaticHostProvider implements HostProvider {
             if (resolvedAddresses.isEmpty()) {
                 return address;
             }
+            //打乱地址列表：防止某个服务器压力过大
             Collections.shuffle(resolvedAddresses);
             return new InetSocketAddress(resolvedAddresses.get(0), address.getPort());
         } catch (UnknownHostException e) {
@@ -358,6 +359,7 @@ public final class StaticHostProvider implements HostProvider {
                 currentIndex = 0;
             }            
             addr = serverAddresses.get(currentIndex);
+            //如果上个地址的和现在地址的索引一样 说明之前其他的机器都没用 就需要睡眠等一等
             needToSleep = needToSleep || (currentIndex == lastIndex && spinDelay > 0);
             if (lastIndex == -1) { 
                 // We don't want to sleep on the first ever connect attempt.

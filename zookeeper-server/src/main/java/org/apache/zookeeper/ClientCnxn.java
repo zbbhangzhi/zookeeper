@@ -260,16 +260,17 @@ public class ClientCnxn {
     }
 
     /**
-     * 网络间传输的最小单元
+     * 网络间传输的最小单元 对协议层的封装
      * This class allows us to pass the headers and the relevant records around.
      */
     static class Packet {
+        //请求头
         RequestHeader requestHeader;
-
+        //响应头
         ReplyHeader replyHeader;
-
+        //请求体
         Record request;
-
+        //响应体
         Record response;
 
         ByteBuffer bb;
@@ -312,7 +313,8 @@ public class ClientCnxn {
         }
 
         /**
-         * packet只序列化了requestHeader和request
+         * packet只序列化了requestHeader、readOnly和request
+         * 其他都保存在客户端的上下文中
          */
         public void createBB() {
             try {
@@ -771,6 +773,7 @@ public class ClientCnxn {
         KeeperState sessionState = KeeperState.SyncConnected;
         if (KeeperException.Code.SESSIONEXPIRED.intValue() == err
                 || KeeperException.Code.CONNECTIONLOSS.intValue() == err) {
+
             sessionState = Event.KeeperState.Disconnected;
         }
         WatchedEvent event = new WatchedEvent(eventType, sessionState,

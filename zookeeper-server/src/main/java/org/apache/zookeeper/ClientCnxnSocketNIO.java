@@ -170,10 +170,11 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         // send only the null-header packet queued by primeConnection().
         // This packet must be sent so that the SASL authentication process
         // can proceed, but all other packets should wait until
-        // SASL authentication completes.
+        // SASL authentication completes. todo
         Iterator<Packet> iter = outgoingQueue.iterator();
         while (iter.hasNext()) {
             Packet p = iter.next();
+            //当客户端与服务端正在处理SASL权限时，不含请求头的packet是可以被发送的
             if (p.requestHeader == null) {
                 // We've found the priming-packet. Move it to the beginning of the queue.
                 iter.remove();

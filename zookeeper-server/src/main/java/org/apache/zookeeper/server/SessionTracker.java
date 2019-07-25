@@ -27,6 +27,7 @@ import org.apache.zookeeper.KeeperException.SessionExpiredException;
 import org.apache.zookeeper.KeeperException.SessionMovedException;
 
 /**
+ * 会话管理：会话超时检查/会话激活/会话分桶迁移/会话清理 todo 在什么情况下使用
  * This is the basic interface that ZooKeeperServer uses to track sessions. The
  * standalone and leader ZooKeeperServer use the same SessionTracker. The
  * FollowerZooKeeperServer uses a SessionTracker which is basically a simple
@@ -34,6 +35,7 @@ import org.apache.zookeeper.KeeperException.SessionMovedException;
  */
 public interface SessionTracker {
     public static interface Session {
+        //服务端分配
         long getSessionId();
         int getTimeout();
         boolean isClosing();
@@ -63,6 +65,7 @@ public interface SessionTracker {
     boolean commitSession(long id, int to);
 
     /**
+     * 会话激活
      * @param sessionId
      * @param sessionTimeout
      * @return false if session is no longer active
