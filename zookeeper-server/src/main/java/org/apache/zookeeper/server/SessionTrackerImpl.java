@@ -49,6 +49,9 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     protected final ConcurrentHashMap<Long, SessionImpl> sessionsById =
         new ConcurrentHashMap<Long, SessionImpl>();
 
+    /**
+     * 分桶管理
+     */
     private final ExpiryQueue<SessionImpl> sessionExpiryQueue;
 
     private final ConcurrentMap<Long, Integer> sessionsWithTimeout;
@@ -146,6 +149,9 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         return sw.toString();
     }
 
+    /**
+     * 它本身是一个线程 会不停的进行超时检查：逐个依次对会话桶中剩下的会话进行清理，并清理相关节点
+     */
     @Override
     public void run() {
         try {

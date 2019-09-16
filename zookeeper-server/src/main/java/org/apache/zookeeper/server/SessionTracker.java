@@ -65,7 +65,7 @@ public interface SessionTracker {
     boolean commitSession(long id, int to);
 
     /**
-     * 会话激活
+     * 会话激活 （由leader来检查并激活）
      * @param sessionId
      * @param sessionTimeout
      * @return false if session is no longer active
@@ -132,6 +132,7 @@ public interface SessionTracker {
 
     /**
      * Returns a mapping of time to session IDs that expire at that time.
+     * session 分桶
      */
     Map<Long, Set<Long>> getSessionExpiryMap();
 

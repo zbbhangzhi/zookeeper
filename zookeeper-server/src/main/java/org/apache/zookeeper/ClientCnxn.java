@@ -313,8 +313,9 @@ public class ClientCnxn {
         }
 
         /**
+         * 序列化
          * packet只序列化了requestHeader、readOnly和request
-         * 其他都保存在客户端的上下文中
+         * 其他都保存在客户端的上下文中ServerCnxn
          */
         public void createBB() {
             try {

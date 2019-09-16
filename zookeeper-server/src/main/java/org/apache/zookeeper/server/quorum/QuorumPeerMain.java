@@ -43,7 +43,7 @@ import org.apache.zookeeper.server.persistence.FileTxnSnapLog.DatadirException;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
 
 /**
- *
+ * 启动类
  * <h2>Configuration file</h2>
  *
  * When the main() method of this class is used to start the program, the first
@@ -126,12 +126,14 @@ public class QuorumPeerMain {
                 .getSnapRetainCount(), config.getPurgeInterval());
         purgeMgr.start();
 
+        //区分单机还是集群模式
         if (args.length == 1 && config.isDistributed()) {
             runFromConfig(config);
         } else {
             LOG.warn("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
             // there is only server in the quorum -- run as standalone
+            //委托ZooKeeperServerMain启动
             ZooKeeperServerMain.main(args);
         }
     }

@@ -87,6 +87,7 @@ import org.apache.zookeeper.metrics.MetricsProvider;
 import org.apache.zookeeper.metrics.impl.NullMetricsProvider;
 
 /**
+ * 选举管理
  * This class manages the quorum protocol. There are three states this server
  * can be in:
  * <ol>

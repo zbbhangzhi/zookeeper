@@ -102,6 +102,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected DataTreeBean jmxDataTreeBean;
 
     public static final int DEFAULT_TICK_TIME = 3000;
+    //下次会话超时时间
     protected int tickTime = DEFAULT_TICK_TIME;
     /** value of -1 indicates unset, use default */
     protected int minSessionTimeout = -1;
@@ -215,7 +216,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public ZooKeeperServer(FileTxnSnapLog txnLogFactory, int tickTime,
             int minSessionTimeout, int maxSessionTimeout, int clientPortListenBacklog,
             ZKDatabase zkDb, String initialConfig) {
+        //统计器
         serverStats = new ServerStats(this);
+        //服务器与底层数据库对接
         this.txnLogFactory = txnLogFactory;
         this.txnLogFactory.setServerStats(this.serverStats);
         this.zkDb = zkDb;

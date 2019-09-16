@@ -355,6 +355,7 @@ public final class StaticHostProvider implements HostProvider {
                 needToSleep = (spinDelay > 0);
             }        
             ++currentIndex;
+            //环形循环队列
             if (currentIndex == serverAddresses.size()) {
                 currentIndex = 0;
             }            

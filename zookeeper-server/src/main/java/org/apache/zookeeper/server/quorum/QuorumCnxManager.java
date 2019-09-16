@@ -62,6 +62,7 @@ import javax.net.ssl.SSLSocket;
 import static org.apache.zookeeper.common.NetUtils.formatInetAddr;
 
 /**
+ * leader选举过程种建立网络IO
  * This class implements a connection manager for leader election using TCP. It
  * maintains one connection for every pair of servers. The tricky part is to
  * guarantee that there is exactly one connection for every pair of servers that

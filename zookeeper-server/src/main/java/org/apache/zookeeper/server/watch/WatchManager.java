@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * This class manages watches. It allows watches to be associated with a string
  * and removes watchers and their watches in addition to managing triggers.
  * 存储标记了watcher注册请求 对应的ServerCnxn并触发它
+ * 客户端收到zk发起的watcher事件触发通知，从这里找出对应的watcher执行回调逻辑
  */
 public class WatchManager implements IWatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);

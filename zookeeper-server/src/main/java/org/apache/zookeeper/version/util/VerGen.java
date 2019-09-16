@@ -18,7 +18,6 @@
 
 package org.apache.zookeeper.version.util;
 
-import org.apache.zookeeper.server.ExitCode;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -34,7 +33,6 @@ public class VerGen {
     static void printUsage() {
         System.out.print("Usage:\tjava  -cp <classpath> org.apache.zookeeper."
                 + "version.util.VerGen maj.min.micro[-qualifier] rev buildDate outputDirectory");
-        System.exit(ExitCode.UNEXPECTED_ERROR.getValue());
     }
 
     public static void generateFile(File outputDir, Version version, String rev, String buildDate)
@@ -46,12 +44,10 @@ public class VerGen {
             boolean ret = pkgdir.mkdirs();
             if (!ret) {
                 System.out.println("Cannnot create directory: " + path);
-                System.exit(ExitCode.UNEXPECTED_ERROR.getValue());
             }
         } else if (!pkgdir.isDirectory()) {
             // not a directory
             System.out.println(path + " is not a directory.");
-            System.exit(ExitCode.UNEXPECTED_ERROR.getValue());
         }
 
         try (FileWriter w = new FileWriter(new File(pkgdir, VERSION_INTERFACE_NAME + ".java"))) {
@@ -94,7 +90,6 @@ public class VerGen {
         } catch (IOException e) {
             System.out.println("Unable to generate version.Info file: "
                     + e.getMessage());
-            System.exit(ExitCode.UNEXPECTED_ERROR.getValue());
         }
 
         // Generate a main class to display version data
@@ -189,7 +184,6 @@ public class VerGen {
             if (version == null) {
                 System.err.println(
                         "Invalid version number format, must be \"x.y.z(-.*)?\"");
-                System.exit(ExitCode.UNEXPECTED_ERROR.getValue());
             }
             String rev = args[1];
             if (rev == null || rev.trim().isEmpty()) {
